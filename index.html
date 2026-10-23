@@ -72,7 +72,7 @@ header .logo{font-size:23px;margin:0;white-space:nowrap}
    <button class="primary" type="submit">Create Account</button>
   </form>
   <div id="authMsg" class="msg" role="status"></div>
-  <div id="switchLine" class="subtle" style="margin-top:20px">Don't have an account? <button type="button" class="link" id="switchAuth">Sign Up</button></div>
+  <div id="switchLine" class="subtle" style="margin-top:20px">Don't have an account? <button class="link" id="switchAuth">Sign Up</button></div>
  </div>
 </section>
 
@@ -119,31 +119,6 @@ header .logo{font-size:23px;margin:0;white-space:nowrap}
 </div>
 <nav class="bottom"><button data-page="home">⌂</button><button data-page="profile">♙</button><button id="createBottom">＋</button><button data-page="notifications">♡</button></nav>
 </div>
-
-<script>
-(function(){
-  function switchAuthScreen(){
-    const login=document.getElementById('loginForm');
-    const signup=document.getElementById('signupForm');
-    const line=document.getElementById('switchLine');
-    if(!login || !signup || !line) return;
-    const showingSignup=!signup.classList.contains('hidden');
-    login.classList.toggle('hidden', showingSignup);
-    signup.classList.toggle('hidden', !showingSignup);
-    line.innerHTML=showingSignup
-      ? 'Already have an account? <button type="button" class="link" id="switchAuth">Sign In</button>'
-      : 'Don’t have an account? <button type="button" class="link" id="switchAuth">Sign Up</button>';
-    const msg=document.getElementById('authMsg');
-    if(msg) msg.textContent='';
-  }
-  document.addEventListener('click', function(e){
-    if(e.target && e.target.id==='switchAuth'){
-      e.preventDefault();
-      switchAuthScreen();
-    }
-  });
-})();
-</script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
@@ -196,8 +171,8 @@ function toggleAuth(mode){
  $('loginForm').classList.toggle('hidden',mode!=='signin');
  $('signupForm').classList.toggle('hidden',mode!=='signup');
  $('switchLine').innerHTML=mode==='signin'
-  ? 'Don’t have an account? <button type="button" class="link" id="switchAuth">Sign Up</button>'
-  : 'Already have an account? <button type="button" class="link" id="switchAuth">Sign In</button>';
+  ? 'Don’t have an account? <button class="link" id="switchAuth">Sign Up</button>'
+  : 'Already have an account? <button class="link" id="switchAuth">Sign In</button>';
  $('switchAuth').addEventListener('click',()=>toggleAuth(currentMode==='signin'?'signup':'signin'));
  showAuthMessage('');
 }
@@ -216,18 +191,20 @@ $('signupForm').addEventListener('submit',async e=>{
  if(!/^[a-z0-9._]{3,30}$/.test(username)){showAuthMessage('Username must be 3–30 characters: letters, numbers, dots or underscores.');return}
  showAuthMessage('Creating account…');
  try{
-  // Create the Firebase Auth account first. Firestore username checks require a signed-in user.
+  // Create the Firebase Auth account first; network/auth calls must not run inside a Firestore transaction.
+  const existing=await getDoc(doc(db,'usernames',username));
+  if(existing.exists()){showAuthMessage('That username is already taken.');return;}
   const cred=await createUserWithEmailAndPassword(auth,email,password);
   await updateProfile(cred.user,{displayName:name});
   await runTransaction(db,async tx=>{
    const usernameRef=doc(db,'usernames',username);
    const again=await tx.get(usernameRef);
-   if(again.exists())throw new Error('That username is already taken. Your email account was created; sign in and choose a different username.');
+   if(again.exists())throw new Error('That username is already taken. This email account was created; sign in and choose a different username after setup.');
    tx.set(usernameRef,{uid:cred.user.uid});
    tx.set(doc(db,'users',cred.user.uid),{uid:cred.user.uid,username,name,bio:'Creating my own world 📸',photoURL:'',createdAt:serverTimestamp()});
   });
-  showAuthMessage('Account created! Signing you in…');
- }catch(err){showAuthMessage(friendlyError(err));}
+  showAuthMessage('');
+ }catch(err){showAuthMessage(err.message==='That username is already taken.'?err.message:friendlyError(err));}
 });
 
 if(ready && auth) onAuthStateChanged(auth,async user=>{
@@ -316,4 +293,14 @@ async function renderFeed(){
   article.append(head,renderMedia(post,'postmedia'));
   const actions=document.createElement('div');actions.className='actions';
   const like=safeText('button','♡');like.title='Like';like.onclick=()=>toggleLike(post,like);
-  const commentBtn=safeText('button','♧');commentBtn.title='Show comments';commentBtn.onclick=()=>article.querySelector('.commentrow input').f
+  const commentBtn=safeText('button','♧');commentBtn.title='Show comments';commentBtn.onclick=()=>article.querySelector('.commentrow input').focus();
+  actions.append(like,commentBtn);
+  const count=safeText('button',(post.likeCount||0)+' likes');count.style.fontSize='13px';count.style.cursor='default';
+  actions.append(count);article.append(actions);
+  const caption=safeText('div','');caption.className='caption';
+  const strong=safeText('b','@'+(post.username||'user')+' ');
+  caption.append(strong,document.createTextNode(post.caption||''));article.append(caption);
+  const comments=safeText('div','');comments.className='commentlist';comments.id='comments-'+post.id;article.append(comments);
+  const row=document.createElement('form');row.className='commentrow';
+  const input=document.createElement('input');input.placeholder='Add a comment…';input.maxLength=500;input.required=true;
+  const submit=safeText('but
