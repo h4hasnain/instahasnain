@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Insta Hasnain</title>
+<style>
+:root{--pink:#ff2876;--purple:#833ab4;--line:#e9e9e9;--muted:#888}
+*{box-sizing:border-box}body{margin:0;background:#fafafa;color:#262626;font-family:Arial,sans-serif}
+button,input,textarea{font:inherit}button{cursor:pointer}
+.hidden{display:none!important}
+#auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#fff0f6,#f2e9ff,#fff)}
+.card{width:100%;max-width:390px;background:white;border:1px solid #ddd;border-radius:15px;padding:28px 24px;text-align:center;box-shadow:0 8px 35px #0000000c}
+.logo{font-size:30px;font-weight:900;letter-spacing:-1px;margin:5px 0 15px;background:linear-gradient(45deg,#ff9a00,#ff2876,#833ab4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtle{font-size:13px;color:var(--muted);line-height:1.5}
+.field{width:100%;padding:12px;margin:5px 0;border:1px solid #ddd;border-radius:7px;background:#fafafa;outline-color:#c36acb}
+.primary{width:100%;border:0;border-radius:8px;padding:12px;background:linear-gradient(90deg,#ff2876,#833ab4);color:white;font-weight:bold;margin-top:10px}
+.link{border:0;background:none;color:#2878d1;font-weight:bold}
+.msg{font-size:13px;color:#c62855;margin-top:10px;line-height:1.5}
+header{height:60px;position:sticky;top:0;z-index:5;background:white;border-bottom:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;padding:0 12px;gap:12px}
+header .logo{font-size:23px;margin:0;white-space:nowrap}
+.search{width:min(30%,220px);padding:10px;border:0;background:#f1f1f1;border-radius:8px}
+.headbtn{font-size:23px;border:0;background:none}
+.layout{max-width:950px;margin:24px auto;display:grid;grid-template-columns:minmax(0,600px) 270px;gap:30px;padding:0 12px}
+.stories{display:flex;gap:14px;overflow:auto;background:white;border:1px solid #eee;padding:14px 10px;border-radius:12px}
+.story{min-width:60px;text-align:center;font-size:12px}
+.ring{width:58px;height:58px;padding:3px;margin:0 auto 6px;border-radius:50%;background:linear-gradient(45deg,#ff9a00,#ff2876,#833ab4)}
+.ring img{width:100%;height:100%;border-radius:50%;border:3px solid white;object-fit:cover}
+.post{background:white;border:1px solid #eee;border-radius:12px;margin-top:17px;overflow:hidden}
+.posthead{display:flex;align-items:center;gap:10px;padding:12px}
+.avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#eee}
+.username{font-size:14px;font-weight:bold}.small{font-size:12px;color:var(--muted);margin-top:4px}
+.more{margin-left:auto;border:0;background:none;font-size:20px}
+.postmedia{display:block;width:100%;max-height:650px;object-fit:contain;background:#111}
+.actions{display:flex;align-items:center;gap:17px;padding:12px 13px 5px}
+.actions button{border:0;background:none;font-size:25px;padding:0}.actions .save{margin-left:auto}
+.liked{color:var(--pink)}.caption{font-size:14px;padding:5px 13px 12px;line-height:1.6;overflow-wrap:anywhere}
+.commentlist{font-size:13px;color:#555}.comment{padding-top:4px}
+.commentrow{display:flex;border-top:1px solid #eee}.commentrow input{flex:1;min-width:0;border:0;padding:13px;outline:none}
+.commentrow button{border:0;background:white;color:#2878d1;padding:0 12px}
+.sidebar{padding-top:8px}.myaccount{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.myaccount .avatar{width:46px;height:46px}.page{display:none}.page.active{display:block}
+.profilehead{display:flex;align-items:center;gap:28px;padding:20px 5px 28px}
+.profilephoto{width:95px;height:95px;border-radius:50%;object-fit:cover;background:#eee}
+.stats{display:flex;gap:20px;font-size:12px;margin:17px 0}.stats span{text-align:center}
+.btn{border:0;background:#eee;border-radius:7px;padding:9px 13px;font-weight:bold}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.grid img,.grid video{width:100%;aspect-ratio:1;object-fit:cover;background:#eee}
+.notice{background:#fff5d8;border:1px solid #f0d995;padding:10px;border-radius:8px;font-size:12px;line-height:1.5;margin:12px 0}
+#file{display:none}.bottom{display:none}
+@media(max-width:700px){header{justify-content:space-between;padding:0 10px;gap:5px}header .logo{font-size:20px}.search{width:100px}
+.layout{display:block;margin:12px auto;padding:0 8px}.sidebar{display:none}.post{border-radius:0;margin:12px -8px;border-left:0;border-right:0}.postmedia{max-height:none}
+.bottom{display:flex;position:fixed;bottom:0;left:0;right:0;height:56px;justify-content:space-around;align-items:center;background:white;border-top:1px solid #eee;z-index:6}
+.bottom button{font-size:23px;border:0;background:none}body{padding-bottom:56px}.profilehead{gap:15px}.profilephoto{width:76px;height:76px}.stats{gap:13px}}
+</style>
+</head>
+<body>
+<section id="auth">
+ <div class="card">
+  <div class="logo">Insta Hasnain</div>
+  <p class="subtle">Share your moments. Connect with friends.</p>
+  <form id="loginForm">
+   <input class="field" id="loginEmail" type="email" autocomplete="email" placeholder="Email address" required>
+   <input class="field" id="loginPassword" type="password" autocomplete="current-password" placeholder="Password" required>
+   <button class="primary" type="submit">Sign In</button>
+  </form>
+  <form id="signupForm" class="hidden">
+   <input class="field" id="signupName" autocomplete="name" placeholder="Full name" maxlength="60" required>
+   <input class="field" id="signupUsername" autocomplete="username" placeholder="Username (e.g. h4._.hasnain)" minlength="3" maxlength="30" required>
+   <input class="field" id="signupEmail" type="email" autocomplete="email" placeholder="Email address" required>
+   <input class="field" id="signupPassword" type="password" autocomplete="new-password" minlength="6" placeholder="Password (at least 6 characters)" required>
+   <button class="primary" type="submit">Create Account</button>
+  </form>
+  <div id="authMsg" class="msg" role="status"></div>
+  <div id="switchLine" class="subtle" style="margin-top:20px">Don't have an account? <button class="link" id="switchAuth">Sign Up</button></div>
+ </div>
+</section>
+
+<div id="app" class="hidden">
+<header>
+ <div class="logo">Insta Hasnain</div>
+ <input class="search" id="search" placeholder="Search posts..." aria-label="Search posts">
+ <button class="headbtn" id="createTop" title="Upload photo/video">＋</button>
+ <button class="headbtn" id="logout" title="Sign out">⇥</button>
+</header>
+<div class="layout">
+<main>
+ <section id="home" class="page active">
+  <div class="stories">
+   <div class="story"><div class="ring"><img src="https://picsum.photos/seed/ihprofile/100" alt=""></div>Your feed</div>
+   <div class="story"><div class="ring"><img src="https://picsum.photos/seed/ihstory1/100" alt=""></div>stories</div>
+   <div class="story"><div class="ring"><img src="https://picsum.photos/seed/ihstory2/100" alt=""></div>friends</div>
+   <div class="story"><div class="ring"><img src="https://picsum.photos/seed/ihstory3/100" alt=""></div>vibes</div>
+  </div>
+  <div class="notice">Posts uploaded here are shared with signed-in users of this Firebase project. Only upload content you have permission to share.</div>
+  <div id="feed"><p class="subtle">Loading feed…</p></div>
+ </section>
+ <section id="profile" class="page">
+  <div class="profilehead">
+   <img class="profilephoto" id="profilePhoto" src="https://picsum.photos/seed/ihprofile/300" alt="Profile">
+   <div style="min-width:0">
+    <div class="username" id="profileUsername" style="font-size:19px">h4._.hasnain</div>
+    <p><button class="btn" id="editProfile">Edit profile</button></p>
+    <div class="stats"><span><b id="postCount">0</b><br>Posts</span><span><b id="followerCount">0</b><br>Followers</span><span><b id="followingCount">0</b><br>Following</span></div>
+   </div>
+  </div>
+  <b id="displayName">Hasnain ✨</b><p class="small" id="bio">Creating my own world 📸</p>
+  <div class="grid" id="profileGrid"></div>
+ </section>
+ <section id="notifications" class="page"><h2>Notifications</h2><p class="subtle">Likes and comments appear on your posts.</p></section>
+ <input type="file" id="file" accept="image/*,video/*">
+</main>
+<aside class="sidebar">
+ <div class="myaccount"><img class="avatar" id="sideAvatar" src="https://picsum.photos/seed/ihprofile/100" alt="">
+  <div><div class="username" id="sideUsername">h4._.hasnain</div><div class="small" id="sideName">Hasnain</div></div>
+ </div>
+ <p class="small">Welcome to Insta Hasnain. Follow community guidelines and respect other users.</p>
+</aside>
+</div>
+<nav class="bottom"><button data-page="home">⌂</button><button data-page="profile">♙</button><button id="createBottom">＋</button><button data-page="notifications">♡</button></nav>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, updateDoc, increment, runTransaction, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-storage.js";
+
+/* STEP 1: Replace this example object with your Firebase project's web config.
+   Firebase Console > Project settings > Your apps > SDK setup and configuration. */
+const firebaseConfig = {
+  apiKey: "PASTE_YOUR_FIREBASE_API_KEY",
+  authDomain: "PASTE_YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "PASTE_YOUR_PROJECT_ID",
+  storageBucket: "PASTE_YOUR_STORAGE_BUCKET",
+  messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
+  appId: "PASTE_YOUR_APP_ID"
+};
+
+const $ = id => document.getElementById(id);
+let app, auth, db, storage, currentUser=null, profileData={}, unsubscribeFeed=null;
+let currentMode='signin', feedPosts=[], likeBusy=new Set();
+
+const ready = firebaseConfig.apiKey !== "PASTE_YOUR_FIREBASE_API_KEY" &&
+              firebaseConfig.projectId !== "PASTE_YOUR_PROJECT_ID";
+if(ready){
+ try {
+  app=initializeApp(firebaseConfig); auth=getAuth(app); db=getFirestore(app); storage=getStorage(app);
+ } catch(e){ showAuthMessage("Firebase setup error: "+e.message); }
+} else {
+ showAuthMessage("Setup required: add your Firebase web config in this HTML file before signing in.");
+}
+
+function showAuthMessage(text){ $('authMsg').textContent=text||''; }
+function friendlyError(e){
+ const map={
+  'auth/email-already-in-use':'This email already has an account.',
+  'auth/invalid-email':'Please enter a valid email address.',
+  'auth/weak-password':'Choose a stronger password (at least 6 characters).',
+  'auth/invalid-credential':'Email or password is incorrect.',
+  'auth/user-not-found':'No account found for this email.',
+  'auth/wrong-password':'Email or password is incorrect.',
+  'auth/network-request-failed':'Network error. Check your internet connection.',
+  'permission-denied':'Permission denied. Check your Firestore/Storage security rules.'
+ };
+ return map[e.code]||e.message||'Something went wrong.';
+}
+function toggleAuth(mode){
+ currentMode=mode;
+ $('loginForm').classList.toggle('hidden',mode!=='signin');
+ $('signupForm').classList.toggle('hidden',mode!=='signup');
+ $('switchLine').innerHTML=mode==='signin'
+  ? 'Don’t have an account? <button class="link" id="switchAuth">Sign Up</button>'
+  : 'Already have an account? <button class="link" id="switchAuth">Sign In</button>';
+ $('switchAuth').addEventListener('click',()=>toggleAuth(currentMode==='signin'?'signup':'signin'));
+ showAuthMessage('');
+}
+$('switchAuth').addEventListener('click',()=>toggleAuth('signup'));
+
+$('loginForm').addEventListener('submit',async e=>{
+ e.preventDefault(); if(!auth){showAuthMessage('First configure Firebase in the code.');return}
+ showAuthMessage('Signing in…');
+ try{await signInWithEmailAndPassword(auth,$('loginEmail').value.trim(),$('loginPassword').value);showAuthMessage('');}
+ catch(err){showAuthMessage(friendlyError(err));}
+});
+$('signupForm').addEventListener('submit',async e=>{
+ e.preventDefault(); if(!auth){showAuthMessage('First configure Firebase in the code.');return}
+ const name=$('signupName').value.trim(), username=$('signupUsername').value.trim().toLowerCase().replace(/^@/,'');
+ const email=$('signupEmail').value.trim(), password=$('signupPassword').value;
+ if(!/^[a-z0-9._]{3,30}$/.test(username)){showAuthMessage('Username must be 3–30 characters: letters, numbers, dots or underscores.');return}
+ showAuthMessage('Creating account…');
+ try{
+  // Create the Firebase Auth account first; network/auth calls must not run inside a Firestore transaction.
+  const existing=await getDoc(doc(db,'usernames',username));
+  if(existing.exists()){showAuthMessage('That username is already taken.');return;}
+  const cred=await createUserWithEmailAndPassword(auth,email,password);
+  await updateProfile(cred.user,{displayName:name});
+  await runTransaction(db,async tx=>{
+   const usernameRef=doc(db,'usernames',username);
+   const again=await tx.get(usernameRef);
+   if(again.exists())throw new Error('That username is already taken. This email account was created; sign in and choose a different username after setup.');
+   tx.set(usernameRef,{uid:cred.user.uid});
+   tx.set(doc(db,'users',cred.user.uid),{uid:cred.user.uid,username,name,bio:'Creating my own world 📸',photoURL:'',createdAt:serverTimestamp()});
+  });
+  showAuthMessage('');
+ }catch(err){showAuthMessage(err.message==='That username is already taken.'?err.message:friendlyError(err));}
+});
+
+if(ready && auth) onAuthStateChanged(auth,async user=>{
+ if(!user){currentUser=null;showAuth();return}
+ currentUser=user;
+ try{
+  const snap=await getDoc(doc(db,'users',user.uid));
+  profileData=snap.exists()?snap.data():{uid:user.uid,username:user.displayName||user.email.split('@')[0],name:user.displayName||'User',bio:''};
+  showApp(); startFeed();
+ }catch(e){showAuthMessage(friendlyError(e));}
+});
+
+function showAuth(){ $('auth').classList.remove('hidden');$('app').classList.add('hidden'); if(unsubscribeFeed)unsubscribeFeed(); }
+function showApp(){
+ $('auth').classList.add('hidden');$('app').classList.remove('hidden');
+ $('profileUsername').textContent='@'+(profileData.username||'user');
+ $('sideUsername').textContent='@'+(profileData.username||'user');
+ $('sideName').textContent=profileData.name||'User';
+ $('displayName').textContent=profileData.name||'User';
+ $('bio').textContent=profileData.bio||'';
+ const photo=profileData.photoURL||'https://picsum.photos/seed/ihprofile/300';
+ $('profilePhoto').src=photo;$('sideAvatar').src=photo;
+}
+$('logout').addEventListener('click',()=>signOut(auth));
+document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');if(id==='profile')renderProfileGrid();window.scrollTo({top:0,behavior:'smooth'});}
+$('createTop').addEventListener('click',()=> $('file').click());
+$('createBottom').addEventListener('click',()=> $('file').click());
+
+$('file').addEventListener('change',async e=>{
+ const file=e.target.files[0]; if(!file)return;
+ if(!file.type.startsWith('image/')&&!file.type.startsWith('video/')){alert('Choose an image or video.');e.target.value='';return}
+ const maxBytes=file.type.startsWith('video/')?100*1024*1024:15*1024*1024;
+ if(file.size>maxBytes){alert(file.type.startsWith('video/')?'Video must be 100 MB or smaller.':'Image must be 15 MB or smaller.');e.target.value='';return}
+ const caption=prompt('Write a caption (optional):')||'';
+ const id=crypto.randomUUID();
+ const path=`posts/${currentUser.uid}/${id}_${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+ const storageRef=ref(storage,path);
+ const btn=$('createTop');btn.disabled=true;btn.textContent='…';
+ try{
+  const task=uploadBytesResumable(storageRef,file,{contentType:file.type});
+  await new Promise((resolve,reject)=>task.on('state_changed',
+   snap=>{const pct=Math.round(snap.bytesTransferred/snap.totalBytes*100);btn.textContent=pct+'%';},
+   reject,resolve));
+  const mediaURL=await getDownloadURL(storageRef);
+  await addDoc(collection(db,'posts'),{
+   uid:currentUser.uid,username:profileData.username||currentUser.email.split('@')[0],
+   name:profileData.name||currentUser.displayName||'User',caption,mediaURL,mediaType:file.type.startsWith('video/')?'video':'image',
+   storagePath:path,createdAt:serverTimestamp(),likeCount:0
+  });
+  showPage('home');
+ }catch(err){alert('Upload failed: '+friendlyError(err))}
+ finally{btn.disabled=false;btn.textContent='＋';e.target.value='';}
+});
+
+function startFeed(){
+ if(unsubscribeFeed)unsubscribeFeed();
+ const q=query(collection(db,'posts'),orderBy('createdAt','desc'));
+ unsubscribeFeed=onSnapshot(q,snap=>{
+  feedPosts=snap.docs.map(d=>({id:d.id,...d.data()}));
+  renderFeed();renderProfileGrid();
+ },err=>{$('feed').textContent='Could not load feed: '+friendlyError(err);});
+}
+function safeText(tag,text,className){
+ const el=document.createElement(tag);el.textContent=text||'';if(className)el.className=className;return el;
+}
+function renderMedia(post,cls){
+ let el;
+ if(post.mediaType==='video'){el=document.createElement('video');el.controls=true;el.playsInline=true;el.preload='metadata';}
+ else{el=document.createElement('img');el.alt='Post by '+(post.username||'user');}
+ el.src=post.mediaURL;el.className=cls;return el;
+}
+async function renderFeed(){
+ const feed=$('feed');feed.replaceChildren();
+ const term=$('search').value.trim().toLowerCase();
+ const shown=feedPosts.filter(p=>(p.caption||'').toLowerCase().includes(term)||(p.username||'').toLowerCase().includes(term));
+ if(!shown.length){feed.append(safeText('p',term?'No matching posts.':'No posts yet. Upload the first photo or video!','subtle'));return}
+ for(const post of shown){
+  const article=document.createElement('article');article.className='post';
+  const head=document.createElement('div');head.className='posthead';
+  const avatar=document.createElement('img');avatar.className='avatar';avatar.src='https://picsum.photos/seed/'+encodeURIComponent(post.username||'user')+'/100';avatar.alt='';
+  const identity=document.createElement('div');identity.append(safeText('div','@'+(post.username||'user'),'username'));
+  identity.append(safeText('div',post.createdAt?.toDate?post.createdAt.toDate().toLocaleString():'Just posted','small'));
+  head.append(avatar,identity);
+  if(post.uid===currentUser.uid){const del=safeText('button','•••','more');del.onclick=()=>deletePost(post);head.append(del)}
+  article.append(head,renderMedia(post,'postmedia'));
+  const actions=document.createElement('div');actions.className='actions';
+  const like=safeText('button','♡');like.title='Like';like.onclick=()=>toggleLike(post,like);
+  const commentBtn=safeText('button','♧');commentBtn.title='Show comments';commentBtn.onclick=()=>article.querySelector('.commentrow input').focus();
+  actions.append(like,commentBtn);
+  const count=safeText('button',(post.likeCount||0)+' likes');count.style.fontSize='13px';count.style.cursor='default';
+  actions.append(count);article.append(actions);
+  const caption=safeText('div','');caption.className='caption';
+  const strong=safeText('b','@'+(post.username||'user')+' ');
+  caption.append(strong,document.createTextNode(post.caption||''));article.append(caption);
+  const comments=safeText('div','');comments.className='commentlist';comments.id='comments-'+post.id;article.append(comments);
+  const row=document.createElement('form');row.className='commentrow';
+  const input=document.createElement('input');input.placeholder='Add a comment…';input.maxLength=500;input.required=true;
+  const submit=safeText('button','Post');submit.type='submit';row.append(input,submit);
+  row.addEventListener('submit',async e=>{e.preventDefault();if(!input.value.trim())return;submit.disabled=true;try{
+   await addDoc(collection(db,'posts',post.id,'comments'),{uid:currentUser.uid,username:profileData.username||'user',text:input.value.trim(),createdAt:serverTimestamp()});input.value='';
+  }catch(err){alert('Comment failed: '+friendlyError(err))}finally{submit.disabled=false}});
+  article.append(row);feed.append(article);
+  loadComments(post.id,comments);
+  loadMyLike(post.id,like);
+ }
+}
+async function loadComments(postId,container){
+ try{
+  const q=query(collection(db,'posts',postId,'comments'),orderBy('createdAt','asc'));
+  onSnapshot(q,snap=>{container.replaceChildren();snap.docs.slice(-30).forEach(d=>{const c=d.data();const line=document.createElement('div');line.className='comment';line.append(safeText('b','@'+(c.username||'user')+' '),document.createTextNode(c.text||''));container.append(line)})},
+  err=>{container.textContent='Comments unavailable.'});
+ }catch(e){}
+}
+async function loadMyLike(postId,btn){
+ try{const s=await getDoc(doc(db,'posts',postId,'likes',currentUser.uid));if(s.exists()){btn.textContent='♥';btn.classList.add('liked');btn.dataset.liked='yes'}}catch(e){}
+}
+async function toggleLike(post,btn){
+ if(likeBusy.has(post.id))return;likeBusy.add(post.id);
+ const likeRef=doc(db,'posts',post.id,'likes',currentUser.uid),postRef=doc(db,'posts',post.id);
+ try{
+  await runTransaction(db,async tx=>{
+   const likeSnap=await tx.get(likeRef),postSnap=await tx.get(postRef);
+   if(!postSnap.exists())throw new Error('Post no longer exists.');
+   if(likeSnap.exists()){tx.delete(likeRef);tx.update(postRef,{likeCount:increment(-1)});}
+   else{tx.set(likeRef,{uid:currentUser.uid,createdAt:serverTimestamp()});tx.update(postRef,{likeCount:increment(1)});}
+  });
+ }catch(e){alert('Like failed: '+friendlyError(e))}
+ finally{likeBusy.delete(post.id)}
+}
+async function deletePost(post){
+ if(!confirm('Delete this post?'))return;
+ try{
+  await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js').then(async m=>{await m.deleteDoc(doc(db,'posts',post.id))});
+  // Storage cleanup can be added using deleteObject; security rules limit deletion to the owner.
+ }catch(e){alert('Delete failed: '+friendlyError(e))}
+}
+function renderProfileGrid(){
+ const grid=$('profileGrid');grid.replaceChildren();
+ const mine=feedPosts.filter(p=>p.uid===currentUser?.uid);
+ $('postCount').textContent=mine.length;
+ mine.forEach(p=>{
+  const media=p.mediaType==='video'?document.createElement('video'):document.createElement('img');
+  media.src=p.mediaURL;if(media.tagName==='VIDEO'){media.muted=true;media.playsInline=true}
+  media.alt=p.caption||'My post';grid.append(media);
+ });
+}
+$('search').addEventListener('input',renderFeed);
+$('editProfile').addEventListener('click',async()=>{
+ const name=prompt('Display name:',profileData.name||'');if(name===null||!name.trim())return;
+ const bio=prompt('Bio:',profileData.bio||'')??profileData.bio??'';
+ try{await updateDoc(doc(db,'users',currentUser.uid),{name:name.trim(),bio});
+ profileData.name=name.trim();profileData.bio=bio;showApp();}
+ catch(e){alert('Profile update failed: '+friendlyError(e))}
+});
+</script>
+</body>
+</html>
