@@ -1,0 +1,71 @@
+// Firestore rules — Firebase Console > Firestore Database > Rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create: if isOwner(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.username is string
+        && request.resource.data.name is string;
+      allow update: if isOwner(uid)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.username == resource.data.username;
+      allow delete: if false;
+    }
+
+    match /usernames/{username} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    match /posts/{postId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.username is string
+        && request.resource.data.caption is string
+        && request.resource.data.mediaURL is string
+        && request.resource.data.mediaType in ['image', 'video']
+        && request.resource.data.likeCount == 0;
+      allow update: if signedIn()
+        && (
+          (resource.data.uid == request.auth.uid
+            && request.resource.data.uid == resource.data.uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['caption']))
+          ||
+          (request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['likeCount'])
+            && request.resource.data.likeCount is int
+            && request.resource.data.likeCount >= 0)
+        );
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+
+      match /likes/{userId} {
+        allow read: if signedIn();
+        allow create: if signedIn() && userId == request.auth.uid
+          && request.resource.data.uid == request.auth.uid;
+        allow delete: if signedIn() && userId == request.auth.uid;
+        allow update: if false;
+      }
+
+      match /comments/{commentId} {
+        allow read: if signedIn();
+        allow create: if signedIn()
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.username is string
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 500;
+        allow update, delete: if signedIn()
+          && resource.data.uid == request.auth.uid;
+      }
+    }
+  }
+}
