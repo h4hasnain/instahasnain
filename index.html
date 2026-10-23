@@ -191,20 +191,18 @@ $('signupForm').addEventListener('submit',async e=>{
  if(!/^[a-z0-9._]{3,30}$/.test(username)){showAuthMessage('Username must be 3–30 characters: letters, numbers, dots or underscores.');return}
  showAuthMessage('Creating account…');
  try{
-  // Create the Firebase Auth account first; network/auth calls must not run inside a Firestore transaction.
-  const existing=await getDoc(doc(db,'usernames',username));
-  if(existing.exists()){showAuthMessage('That username is already taken.');return;}
+  // Create the Firebase Auth account first. Firestore username checks require a signed-in user.
   const cred=await createUserWithEmailAndPassword(auth,email,password);
   await updateProfile(cred.user,{displayName:name});
   await runTransaction(db,async tx=>{
    const usernameRef=doc(db,'usernames',username);
    const again=await tx.get(usernameRef);
-   if(again.exists())throw new Error('That username is already taken. This email account was created; sign in and choose a different username after setup.');
+   if(again.exists())throw new Error('That username is already taken. Your email account was created; sign in and choose a different username.');
    tx.set(usernameRef,{uid:cred.user.uid});
    tx.set(doc(db,'users',cred.user.uid),{uid:cred.user.uid,username,name,bio:'Creating my own world 📸',photoURL:'',createdAt:serverTimestamp()});
   });
-  showAuthMessage('');
- }catch(err){showAuthMessage(err.message==='That username is already taken.'?err.message:friendlyError(err));}
+  showAuthMessage('Account created! Signing you in…');
+ }catch(err){showAuthMessage(friendlyError(err));}
 });
 
 if(ready && auth) onAuthStateChanged(auth,async user=>{
@@ -305,61 +303,4 @@ async function renderFeed(){
   const input=document.createElement('input');input.placeholder='Add a comment…';input.maxLength=500;input.required=true;
   const submit=safeText('button','Post');submit.type='submit';row.append(input,submit);
   row.addEventListener('submit',async e=>{e.preventDefault();if(!input.value.trim())return;submit.disabled=true;try{
-   await addDoc(collection(db,'posts',post.id,'comments'),{uid:currentUser.uid,username:profileData.username||'user',text:input.value.trim(),createdAt:serverTimestamp()});input.value='';
-  }catch(err){alert('Comment failed: '+friendlyError(err))}finally{submit.disabled=false}});
-  article.append(row);feed.append(article);
-  loadComments(post.id,comments);
-  loadMyLike(post.id,like);
- }
-}
-async function loadComments(postId,container){
- try{
-  const q=query(collection(db,'posts',postId,'comments'),orderBy('createdAt','asc'));
-  onSnapshot(q,snap=>{container.replaceChildren();snap.docs.slice(-30).forEach(d=>{const c=d.data();const line=document.createElement('div');line.className='comment';line.append(safeText('b','@'+(c.username||'user')+' '),document.createTextNode(c.text||''));container.append(line)})},
-  err=>{container.textContent='Comments unavailable.'});
- }catch(e){}
-}
-async function loadMyLike(postId,btn){
- try{const s=await getDoc(doc(db,'posts',postId,'likes',currentUser.uid));if(s.exists()){btn.textContent='♥';btn.classList.add('liked');btn.dataset.liked='yes'}}catch(e){}
-}
-async function toggleLike(post,btn){
- if(likeBusy.has(post.id))return;likeBusy.add(post.id);
- const likeRef=doc(db,'posts',post.id,'likes',currentUser.uid),postRef=doc(db,'posts',post.id);
- try{
-  await runTransaction(db,async tx=>{
-   const likeSnap=await tx.get(likeRef),postSnap=await tx.get(postRef);
-   if(!postSnap.exists())throw new Error('Post no longer exists.');
-   if(likeSnap.exists()){tx.delete(likeRef);tx.update(postRef,{likeCount:increment(-1)});}
-   else{tx.set(likeRef,{uid:currentUser.uid,createdAt:serverTimestamp()});tx.update(postRef,{likeCount:increment(1)});}
-  });
- }catch(e){alert('Like failed: '+friendlyError(e))}
- finally{likeBusy.delete(post.id)}
-}
-async function deletePost(post){
- if(!confirm('Delete this post?'))return;
- try{
-  await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js').then(async m=>{await m.deleteDoc(doc(db,'posts',post.id))});
-  // Storage cleanup can be added using deleteObject; security rules limit deletion to the owner.
- }catch(e){alert('Delete failed: '+friendlyError(e))}
-}
-function renderProfileGrid(){
- const grid=$('profileGrid');grid.replaceChildren();
- const mine=feedPosts.filter(p=>p.uid===currentUser?.uid);
- $('postCount').textContent=mine.length;
- mine.forEach(p=>{
-  const media=p.mediaType==='video'?document.createElement('video'):document.createElement('img');
-  media.src=p.mediaURL;if(media.tagName==='VIDEO'){media.muted=true;media.playsInline=true}
-  media.alt=p.caption||'My post';grid.append(media);
- });
-}
-$('search').addEventListener('input',renderFeed);
-$('editProfile').addEventListener('click',async()=>{
- const name=prompt('Display name:',profileData.name||'');if(name===null||!name.trim())return;
- const bio=prompt('Bio:',profileData.bio||'')??profileData.bio??'';
- try{await updateDoc(doc(db,'users',currentUser.uid),{name:name.trim(),bio});
- profileData.name=name.trim();profileData.bio=bio;showApp();}
- catch(e){alert('Profile update failed: '+friendlyError(e))}
-});
-</script>
-</body>
-</html>
+   await addDoc(coll
